@@ -31,8 +31,8 @@ public class Finalproject extends ApplicationAdapter {
 		    SpriteBatch spriteBatch;
 		    SpriteBatch laser;
 		    SpriteBatch enemy1;
-		    
-		    
+		    boolean alreadyPlayed = false;
+		    int level;
 		    Texture backgroundTexture;
 		    Mainchar me = new Mainchar();
 		    OrthographicCamera camera;
@@ -57,9 +57,7 @@ public class Finalproject extends ApplicationAdapter {
 		        Sheet = new Texture(Gdx.files.internal("spritesheet.png"));
 		        mainLasers = new Array<lasers>();
 		        backgroundTexture = new Texture (Gdx.files.internal("background.png"));
-		        one.x = 250;
-		        one.y = 166;
-		        enemyArray.add(one);
+		        
 		        
 		        // Use the split utility method to create a 2D array of TextureRegions. This is 
 		        // possible because this sprite sheet contains frames of equal size and they are 
@@ -78,6 +76,7 @@ public class Finalproject extends ApplicationAdapter {
 		            }
 		        }	  
 		    	one.laser = new Texture (Gdx.files.internal("evil laser.png"));
+			    
 				one.Sheet = new Texture (Gdx.files.internal("enemysheet.png"));
 				TextureRegion[][] meep = TextureRegion.split(one.Sheet, 
 			            one.Sheet.getWidth() / FRAME_COLS,
@@ -106,7 +105,17 @@ public class Finalproject extends ApplicationAdapter {
 		    public void render() {
 		    	camera.update();
 		    	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear screen
-		    	
+		    	if (level == 1)
+			{
+				if (alreadyPlayed == false)
+				{
+					for (int x = 0; x < 20; x++)
+					{
+						enemyArray.add(new enemy);
+					}
+					alreadyPlayed = true;
+				}	
+			}
 		    		
 		        if (Gdx.input.isKeyPressed(Keys.A))
 		        {
