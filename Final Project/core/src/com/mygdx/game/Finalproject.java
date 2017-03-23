@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -27,13 +28,14 @@ public class Finalproject extends ApplicationAdapter {
  private static final int FRAME_COLS = 2, FRAME_ROWS = 1;
 
     // Objects used
-	BitmapFont font = new BitmapFont();
+	BitmapFont font;
+	BitmapFont lives;
     Texture Sheet;
     SpriteBatch spriteBatch;
     SpriteBatch laser;
     SpriteBatch enemy1;
     boolean alreadyPlayed = false;
-    int level;
+    int level = 1;
     Texture backgroundTexture;
     Mainchar me = new Mainchar();
     OrthographicCamera camera;
@@ -42,16 +44,19 @@ public class Finalproject extends ApplicationAdapter {
     float stateTime;
     float enemyTime;
     boolean shoot;
+    int random;
     lasers main = new lasers();
     Enemy one = new Enemy();
     Array<Enemy> enemyArray;
     Array<Rectangle> enemyHitbox;
+    boolean beenHit = false;
 
 
     @Override
     public void create() {
-
-	    enemyArray = new Array<Enemy>();
+    font = new BitmapFont();
+    lives = new BitmapFont();
+    enemyArray = new Array<Enemy>();
 	camera = new OrthographicCamera();
 	camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()/2);
 	// Load the sprite sheet as a Texture
@@ -75,24 +80,12 @@ public class Finalproject extends ApplicationAdapter {
 	    for (int j = 0; j < FRAME_COLS; j++) {
 		flying[index++] = tmp[i][j];
 	    }
-	}	  
-	one.laser = new Texture (Gdx.files.internal("evil laser.png"));
-
-		one.Sheet = new Texture (Gdx.files.internal("enemysheet.png"));
-		TextureRegion[][] meep = TextureRegion.split(one.Sheet, 
-		    one.Sheet.getWidth() / FRAME_COLS,
-		    one.Sheet.getHeight() / FRAME_ROWS);
-		TextureRegion[] flyingenemy = new TextureRegion[2 * 1];
-	    int enemyindex = 0;
-	    for (int i = 0; i < FRAME_ROWS; i++) {
-		for (int j = 0; j < FRAME_COLS; j++) {
-		    flyingenemy[enemyindex++] = meep[i][j];
-		}
-	    }
-
+	}
+	
+		
 	// Initialize the Animation with the frame interval and array of frames
 	me.ship = new Animation(0.1f, flying);
-	one.ship1 = new Animation(0.1f, flyingenemy);
+	
 	// Instantiate a SpriteBatch for drawing and reset the elapsed animation
 	// time to 0
 	spriteBatch = new SpriteBatch();
@@ -108,19 +101,65 @@ public class Finalproject extends ApplicationAdapter {
 
 	Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear screen
 	if (level == 1)
+	{
+		if (alreadyPlayed == false)
 		{
-			if (alreadyPlayed == false)
+			for (int y = 1; y < 5; y++)
 			{
-				for (int x = 0; x < 20; x++)
+				for (int x = 0; x < 5; x++)
 				{
 					enemyArray.add(new Enemy());
-					enemyArray.get(x).x = Gdx.graphics.getWidth()/4-20;
-					enemyArray.get(x).x = Gdx.graphics.getHeight()/4-20;
+					switch (y)
+					{
+						case 1:
+						enemyArray.get(x).x = 120 + (50*x);
+						enemyArray.get(x).y = 300;
+						enemyArray.get(x).originalPositionX = 120 + (50*x);
+						enemyArray.get(x).originalPositionY = 300;
+						break;
+						case 2:
+						enemyArray.get(x+5).x = 120 + (50*x);
+						enemyArray.get(x+5).y = 260;
+						enemyArray.get(x).originalPositionX = 120 + (50*x);
+						enemyArray.get(x).originalPositionY = 260;
+						break;
+						case 3:
+						enemyArray.get(x+10).x = 120 + (50*x);
+						enemyArray.get(x+10).y = 220;
+						enemyArray.get(x).originalPositionX = 120 + (50*x);
+						enemyArray.get(x).originalPositionY = 220;
+						break;
+						case 4:
+						enemyArray.get(x+15).x = 120 + (50*x);
+						enemyArray.get(x+15).y = 180;
+						enemyArray.get(x).originalPositionX = 120 + (50*x);
+						enemyArray.get(x).originalPositionY = 180;
+						break;
+					}
 				}
-				alreadyPlayed = true;
-			}	
-		}
-
+			}
+			alreadyPlayed = true;
+		}	
+	}
+	for (int x = 0; x < enemyArray.size; x++)
+	{
+		enemyArray.get(x).laser = new Texture (Gdx.files.internal("evil laser.png"));
+		enemyArray.get(x).Sheet = new Texture (Gdx.files.internal("enemysheet.png"));
+		TextureRegion[][] meep = TextureRegion.split(enemyArray.get(x).Sheet, 
+				enemyArray.get(x).Sheet.getWidth() / FRAME_COLS,
+				enemyArray.get(x).Sheet.getHeight() / FRAME_ROWS);
+			TextureRegion[] flyingenemy = new TextureRegion[2 * 1];
+		    int enemyindex = 0;
+		    for (int i = 0; i < FRAME_ROWS; i++) 
+		    {
+		    	for (int j = 0; j < FRAME_COLS; j++) 
+		    	{
+		    		flyingenemy[enemyindex++] = meep[i][j];
+		    	}
+		    }
+	    enemyArray.get(x).ship1 = new Animation(0.1f, flyingenemy);
+	}
+	
 	if (Gdx.input.isKeyPressed(Keys.A))
 	{
 		me.shipX -= Gdx.graphics.getDeltaTime()* me.speed;
@@ -143,7 +182,7 @@ public class Finalproject extends ApplicationAdapter {
 	}
 	for (int o = 0; o < enemyArray.size; o++)
 	{
-		enemyArray.get(o).hitbox = (new Rectangle(enemyArray.get(o).x, enemyArray.get(o).y, 12, 30 ));
+		enemyArray.get(o).hitbox = (new Rectangle(enemyArray.get(o).x-7, enemyArray.get(o).y, 20, 40));
 	}
 	//
 	if (me.shipY < 0) 
@@ -165,32 +204,28 @@ public class Finalproject extends ApplicationAdapter {
 	//
 	if (Gdx.input.isKeyJustPressed(Keys.SPACE))
 	{
-
 		mainLasers.add(new lasers());
 		mainLasers.get(mainLasers.size -1).x = me.shipX + 9;
 	    mainLasers.get(mainLasers.size -1).y = me.shipY + 36;
 	    mainLasers.get(mainLasers.size -1).shoot = true;
 	    mainLasers.get(mainLasers.size -1).sprite = new Texture (Gdx.files.internal("base laser.png"));
 	}
+	me.hitbox = (new Rectangle(me.shipX, me.shipY, 12, 40));
 
 	// Get current frame of animation for the current stateTime                
 	TextureRegion currentFrame = me.ship.getKeyFrame(stateTime, true);
-	for (int x = 0; x < enemyArray.size; x++)
-	{
-		TextureRegion enemyFrame = enemyArray.get(x).ship1.getKeyFrame(enemyTime, true);
-	}
 	spriteBatch.begin();
 	spriteBatch.draw(backgroundTexture, 0, 0);
-		font.draw(spriteBatch, "Score: " + me.score, 300, 400);
+	font.draw(spriteBatch, "Score: " + me.score, 420, 320);
+	lives.draw(spriteBatch, "Lives: " + me.lives, 420, 20);
 	spriteBatch.draw(currentFrame, me.shipX, me.shipY);
 	spriteBatch.end();
+	enemy1.begin();
 	for (int x = 0; x < enemyArray.size; x++)
 	{
-		 enemy1.begin();
-		     enemy1.draw(enemyArray.get(x).ship1.getKeyFrame(enemyTime, true), enemyArray.get(x).x, enemyArray.get(x).y);
-		     enemy1.end();
+		enemy1.draw(enemyArray.get(x).ship1.getKeyFrame(enemyTime, true), enemyArray.get(x).x, enemyArray.get(x).y);
 	}
-
+	enemy1.end();
 	for (int a = 0; a <= mainLasers.size-1; a++)
 	{
 
@@ -198,47 +233,84 @@ public class Finalproject extends ApplicationAdapter {
 		{
 
 			if (mainLasers.get(a).y < 333)
-			{
+			{ 
+				mainLasers.get(a).y += 4;
 				laser.begin();
 				laser.draw(mainLasers.get(a).sprite, mainLasers.get(a).x, mainLasers.get(a).y);
 				laser.end();	
-				mainLasers.get(a).y += 4;
 				mainLasers.get(a).hitbox = new Rectangle(mainLasers.get(a).x-20, mainLasers.get(a).y-5,30,11);
-				for (int y = 0; y < enemyArray.size; y++)
+				int temp = 0;
+				int temp2 = 0;
+				boolean loop = false;
+				for (int y = 0; y <= enemyArray.size-1; y++)
 				{
 					if (mainLasers.get(a).hitbox.overlaps(enemyArray.get(y).hitbox))
 					{
 						enemyArray.get(y).loseHealth(mainLasers.get(a).damage);
 						mainLasers.get(a).shoot = false;    
-						mainLasers.removeIndex(a);
+						temp2 = a;
 						if (enemyArray.get(y).health == 0)
 						{
-							enemyArray.removeIndex(y);
-								me.score += enemyArray.get(y).score;
+							loop = true;
+							temp = y;
+							me.score += enemyArray.get(y).score;
 						}
 					}
+				}
+				if (loop == true)
+				{
+					enemyArray.removeIndex(temp);
+					mainLasers.removeIndex(temp2);
 				}
 			}
 			else
 			{
 				mainLasers.get(a).shoot = false;    
 				mainLasers.removeIndex(a);
-
 			}
-
-
-
 		}
+	} 
+	int timer = (int) enemyTime; 
+	int temper = timer + 2;
+	if (timer % 5 == 0 && beenHit == true)
+	{
+		beenHit = false;
+	}
+	for (int x=0; x<enemyArray.size;x++)
+	{
+		if (me.hitbox.overlaps(enemyArray.get(x).hitbox) && beenHit == false)
+		{
+			me.loseHealth(enemyArray.get(x).damage);
+			beenHit = true;
+		}
+	}
+	if (me.health <= 0)
+	{
+		me.lives -= 1;
+		me.health = 100;
+	}
+	/*
+	int timer = (int) enemyTime; 
+	if (timer %5 != 0 && enemyArray.size > 0)
+	{
+		enemyArray.get(random).follow(me.shipX, me.shipY);
+	}
+	else if (timer % 5 == 0 && enemyArray.size > 0)
+	{
+		enemyArray.get(random).returnToOG();
+		random = (int)(Math.random() * enemyArray.size -1);
+	}
+	*/
 
 
-	}   
+
 	stateTime += Gdx.graphics.getDeltaTime(); // Accumulate elapsed animation time
 	enemyTime += Gdx.graphics.getDeltaTime();
     } 
 
     @Override
     public void dispose() { // SpriteBatches and Textures must always be disposed
-	spriteBatch.dispose();
+	spriteBatch.dispose(); 
 	Sheet.dispose();
 	laser.dispose();
 	enemy1.dispose();
